@@ -1,0 +1,88 @@
+---
+title: "SDS315_HW3"
+author: "Aaron Coronado, acc5483"
+date: "2024-01-30"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    df_print: paged
+  pdf_document: default
+---
+
+```{r Setup, message = F, warning = F, echo = F}
+library(tidyverse)
+library(mosaic)
+library(kableExtra)
+creatinine <- read_csv("creatinine.csv")
+marketmodel <- read_csv("marketmodel.csv")
+covid <- read_csv("covid.csv")
+milk <- read_csv("milk.csv")
+```
+
+# **Homework 3**
+
+## **Problem 1**
+
+### **(A)**
+
+Using the functions *lm()* and *coef()*, I was able to determine the intercept and slope of the fitted model are 147.81 and -0.62, respectively. After plugging those into the linear regression equation I was left with the following:
+
+$\hat{y}$ = 147.81 - 0.62x.
+
+When I substituted 55 for x, I calculated a creatinine clearance rate of 113.71 mL/minute.
+
+### **(B)**
+
+The rate of creatinine clearance decreases by approximately -0.62 mL/minute per year. I determined this by simply interpreting the slope, which I had previously determine in Part A.
+
+### **(C)**
+
+Using the linear regression equation from Part A, I determined that the predicted creatinine clearance rate for the 40yro and the 60yro was 123.01 mL/min and 110.61 mL/min, respectively. Then I subtracted the actual rate from the predict rate and was left with a difference of 11.99 mL/min for the 40yro and a difference of 1.39 mL/min for the 60yro. As the difference for the 40yro was greater than that of 60yro, the 40yro has the healthier creatinine clearance rate.
+
+## **Problem 2**
+
+```{r Problem 2, message = F, waring = F, echo = F}
+appl_mod = lm(AAPL ~ SPY, data = marketmodel)
+goog_mod = lm(GOOG ~ SPY, data = marketmodel)
+mrk_mod = lm(MRK ~ SPY, data = marketmodel)
+jnj_mod = lm(JNJ ~ SPY, data = marketmodel)
+wmt_mod = lm(WMT ~ SPY, data = marketmodel)
+tgt_mod = lm(TGT ~ SPY, data = marketmodel)
+
+stocks <- tibble(Ticker_Symbol = c("AAPL", "GOOG", "MRK", "JNJ", "WMT", "TGT"),
+                 Intercept = c(coef(appl_mod)[1], coef(goog_mod)[1], coef(mrk_mod)[1], coef(jnj_mod)[1], coef(wmt_mod)[1], coef(tgt_mod)[1]),
+                 Slope = c(coef(appl_mod)[2], coef(goog_mod)[2], coef(mrk_mod)[2], coef(jnj_mod)[2], coef(wmt_mod)[2], coef(tgt_mod)[2]),
+                 R_Squared = c(rsquared(appl_mod), rsquared(goog_mod), rsquared(mrk_mod), rsquared(jnj_mod), rsquared(wmt_mod), rsquared(tgt_mod)))
+
+kable_styling(kbl(stocks))
+```
+
+The figure above displays a table of six individual stocks as well as their respective alphas, betas, and coefficient of determinations. A stock's beta is essentially a measure of that stock's volatility compared to the market. A beta of 1 indicates the stocks moves relatively insync with the market. A beta of greater than 1 indicates a greater volatility in comparison with the market, and a beta of less than 1 indicates the opposite. All in all, beta helps investers assess the risks and returns of stocks and helps in making informed decisions while investing.
+Apple stock has the highest systematic risk as it has the highest beta, and WMT has the least systematic risk as it has the lowest beta.
+
+## **Problem 3**
+
+```{r Problem 3, message = F, waring = F, echo = F}
+ggplot(covid) +
+  geom_line(aes(x = days_since_first_death, y = deaths, color = country)) +
+  labs(x = "Days Since First Death", y = "Deaths")
+```
+
+Italy's estimated growth rate is 0.183 with a doubling time of 4 days.
+
+Spain's estimated growth rate is 0.276 with a doubling time of 3 days.
+
+## **Problem 4**
+
+```{r Problem 4 Log Graph, message = F, warning = F, echo = F}
+ggplot(milk) +
+  geom_point(aes(x = log(price), y = log(sales)))
+```
+
+```{r Problem 4 Calculations, message = F, warning = F, echo = F, eval = F}
+lm_milk = lm(log(sales) ~ log(price), data = milk)
+coef(lm_milk)
+```
+
+When milk prices change by 1%, we expect milk sales to change by -1.62%. I came to this conclusion by running a regression on log(price) and log(sales) and then calling the coefficients of the regression.
